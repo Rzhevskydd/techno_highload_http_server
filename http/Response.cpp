@@ -27,7 +27,7 @@ void ResponseBuilder::checkFileAvailable(const std::string &file_path, status::T
 
 void ResponseBuilder::writeHeader(const Request &request, status::Type &status) {
     sstream_ << request.version << ' ' << status << End_Of_Line
-//             << "Server: fast-http-server" << End_Of_Line
+             << "Server: http_static_server" << End_Of_Line
              << "Date: " << __DATE__ << ' ' << __TIME__ << End_Of_Line
              << "Connection: Close" << End_Of_Line;
 

@@ -19,6 +19,12 @@ void Worker::work(bool* f_terminate, const std::string& doc_root) {
 
         std:: cout << "Received: " + request.path + " - " + std::string(request.method) << std::endl;
 
+        if ((request.method != method::Method_GET && request.method != method::Method_HEAD)) {
+            std::string response = "HTTP/1.1 400 Bad Request\r\nServer: http_static_server\r\n\r\n";
+            client_socket->writeAllBytes(response.data(), response.size());
+            continue;
+        }
+
         std::string response = build_http_response(request, status);
         client_socket->writeAllBytes(response.data(), response.size());
 
