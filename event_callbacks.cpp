@@ -24,13 +24,13 @@ void onAccept(int fd, short events, void *args) {
 //    work_queue.push(std::make_unique<Socket>(client_fd));
 
 //    auto wrapped_queue_ref = std::ref(work_queue);
-//    auto client_ev_read = event_new(ev_base, client_fd, EV_READ, OnRead, (void *) &wrapped_queue_ref);
-    auto client_ev_read = event_new(ev_base, client_fd, EV_READ, OnRead, (void *) &work_queue);
+//    auto client_ev_read = event_new(ev_base, client_fd, EV_READ, onRead, (void *) &wrapped_queue_ref);
+    auto client_ev_read = event_new(ev_base, client_fd, EV_READ, onRead, (void *) &work_queue);
 
     event_add(client_ev_read, nullptr);
 }
 
-void OnRead(int fd, short events, void *args) {
+void onRead(int fd, short events, void *args) {
     auto queue_ptr = reinterpret_cast<WorkQueueType *>(args);
     if (!queue_ptr) {
         return;

@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <string>
 #include <event2/event.h>
+#include <utility>
 #include <vector>
 #include <thread>
 
@@ -13,7 +14,7 @@
 #define DEFAULT_LISTEN_QUEUE_SIZE 1000
 
 void onAccept(int fd, short events, void *args);
-void OnRead(int fd, short events, void *args);
+void onRead(int fd, short events, void *args);
 void sigHandler(int signal, short events, void *args);
 
 using WorkQueueType = WorkQueue<std::unique_ptr<Socket>>;
@@ -21,8 +22,8 @@ using OnAcceptArgsType = std::pair<std::__decay_and_strip<event_base * &>::__typ
 
 class Server {
 public:
-    Server(std::string& host, uint16_t port, std::size_t n_workers) :
-    num_workers_(n_workers), evbase_accept_(nullptr), queue_() {
+    Server(std::string& host, uint16_t port, std::size_t n_workers, std::string doc_root) :
+    num_workers_(n_workers), doc_root_(std::move(doc_root)), evbase_accept_(nullptr), queue_() {
         sock_.makeServerSocket(host, port);
     };
 

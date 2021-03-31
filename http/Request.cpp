@@ -14,6 +14,7 @@ RequestBuilder::operator()(std::string_view &&request_raw, const std::string &do
     getVersion();
 
 //    CheckMethod() && CheckPath(doc_root_sv) && CheckVersion();
+    constructPath(doc_root);
     return std::make_pair(request_, status_);
 }
 
@@ -36,4 +37,42 @@ void RequestBuilder::getVersion() {
 
     request_.version = request_raw_.substr(0, pos);
     request_raw_.remove_prefix(pos);
+}
+
+bool RequestBuilder::constructPath(const std::string & doc_root) {
+    size_t query_string_pos = request_.path.find('?');
+    if (query_string_pos != std::string::npos) {
+        request_.path.resize(query_string_pos);
+    }
+
+    if (request_.path.find("../") != std::string::npos) {
+        status_ = status::Status_403_Forbidden;
+        return false;
+    }
+
+    request_.path = doc_root + request_.path;
+    if (custom_ends_with(request_.path, "/")) {
+        if (custom_ends_with(request_.path, ".html/")) {
+            request_.path += NOT_FOUND_STR;
+
+        } else {
+            request_.path += "index.html";
+        }
+    }
+
+
+    for (size_t url_encode_pos = request_.path.find('%');
+            url_encode_pos != std::string::npos;
+            url_encode_pos = request_.path.find('%')) {
+        std::string_view url_encode = static_cast<std::string_view>(request_.path).substr(url_encode_pos + 1, 2);
+
+        char url_decode = static_cast<char>(std::stoul(url_encode.data(), nullptr, 16));
+        if (url_decode == 0) {
+            continue;
+        }
+
+        request_.path.replace(url_encode_pos, 3, 1, url_decode);
+    }
+
+    return true;
 }

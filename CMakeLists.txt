@@ -13,7 +13,7 @@ link_directories("${LIBEVENT_LIB_DIR}/")
 include_directories("${LIBEVENT_INCLUDE_DIR}")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-add_executable(http_static_server main.cpp server/Server.cpp server/Server.h socket/Socket.cpp socket/Socket.h work_queue/WorkQueue.cpp work_queue/WorkQueue.h event_callbacks.cpp work_queue/Worker.cpp work_queue/Worker.h http/Request.cpp http/Request.h http/common.h)
+add_executable(http_static_server main.cpp server/Server.cpp server/Server.h socket/Socket.cpp socket/Socket.h work_queue/WorkQueue.cpp work_queue/WorkQueue.h event_callbacks.cpp work_queue/Worker.cpp work_queue/Worker.h http/Request.cpp http/Request.h http/common.h http/Response.cpp http/Response.h http/common.cpp)
 
 target_link_libraries(http_static_server ${LIBEVENT_NAME})
 target_include_directories(http_static_server PUBLIC

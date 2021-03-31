@@ -23,7 +23,12 @@ public:
     void setReuseAddr(int sd);
 
     std::string ReadAllBytes(size_t limit);
-    size_t Read(void *buf, size_t chunk_size);
+    size_t readBytes(void *buf, size_t chunk_size);
+
+    void writeAllBytes(const void * data, size_t length) const;
+    size_t writeBytes(const void * data, size_t length) const;
+
+    size_t sendFile(const std::string& file_path) const;
 
 private:
     int sd_;

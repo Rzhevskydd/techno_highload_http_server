@@ -4,6 +4,10 @@
 #include <stdexcept>
 #include <arpa/inet.h>
 #include <sstream>
+#include <fcntl.h>
+#include <filesystem>
+#include <sys/sendfile.h>
+
 
 #include "Server.h"
 #include "Socket.h"
@@ -52,7 +56,7 @@ std::string Socket::ReadAllBytes(size_t limit) {
     std::ostringstream sstream;
     while (sstream.tellp() < limit) {
         std::string s_buf(1024, '\0');
-        size_t bytes_read = Read(s_buf.data(), s_buf.size());
+        size_t bytes_read = readBytes(s_buf.data(), s_buf.size());
 
         sstream.write(s_buf.c_str(), static_cast<long>(bytes_read));
 
@@ -63,7 +67,7 @@ std::string Socket::ReadAllBytes(size_t limit) {
     return sstream.str();
 }
 
-size_t Socket::Read(void *buf, size_t chunk_size) {
+size_t Socket::readBytes(void *buf, size_t chunk_size) {
     while(true) {
         ssize_t bytes_read = read(sd_, buf, chunk_size);
 
@@ -79,5 +83,56 @@ size_t Socket::Read(void *buf, size_t chunk_size) {
             throw std::runtime_error("Cannot read from socket");
         }
         return static_cast<size_t>(bytes_read);
+    }
+}
+
+void Socket::writeAllBytes(const void *data, size_t length) const {
+    size_t bytes_wrote = 0;
+    while (bytes_wrote != length) {
+        const void * begin_of_buffer = static_cast<const char *>(data) + bytes_wrote;
+        size_t bytes = writeBytes(begin_of_buffer, length - bytes_wrote);
+        if (bytes == 0) {
+            throw std::runtime_error("Unable to write " + std::to_string(length) + " bytes");
+        }
+        bytes_wrote += bytes;
+    }
+}
+
+size_t Socket::writeBytes(const void *data, size_t length) const {
+    while(true) {
+        ssize_t  bytes_wrote = write(sd_, data, length);
+        if (bytes_wrote < 0) {
+            if (errno == EINTR) {
+                continue;
+            }
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                return 0;
+            }
+
+            throw std::runtime_error("Cannot write to socket");
+        }
+        return static_cast<size_t>(bytes_wrote);
+    }
+}
+
+size_t Socket::sendFile(const std::string &file_path) const {
+    Socket file = open(file_path.data(), O_RDONLY);
+    if (file.sd_ < 0) {
+        throw std::runtime_error("Error in open file");
+    }
+
+    while (true) {
+        ssize_t bytes_wrote = sendfile(sd_, file.sd_, nullptr, std::filesystem::file_size(file_path));
+
+        if (bytes_wrote < 0) {
+            if (errno == EINTR) {
+                continue;
+            }
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                return 0;
+            }
+            throw std::runtime_error("Cannot send file to socket");
+        }
+        return static_cast<size_t>(bytes_wrote);
     }
 }

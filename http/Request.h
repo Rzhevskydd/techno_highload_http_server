@@ -23,7 +23,7 @@ private:
     void getHTTPMethod();
     bool checkMethod();
     void getPath();
-    bool checkPath(const std::string_view & document_sv_root);
+    bool constructPath(const std::string & doc_root);
     void getVersion();
     bool checkVersion();
 };

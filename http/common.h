@@ -3,6 +3,10 @@
 
 #include <string>
 
+#define NOT_FOUND_STR "NOT_FOUND"
+
+bool custom_ends_with(const std::string_view& str, const std::string& suffix);
+
 namespace method {
     using Type = std::string_view;
     constexpr Type Method_HEAD = "HEAD";
@@ -32,10 +36,6 @@ namespace mime_type {
     Type GetContentType(const std::string_view &file_path);
 
 }
-//namespace tools {
-//    std::tuple<std::string_view, std::string_view , uint16_t, size_t> GetArgs(char * argv[]);
-//    std::tuple<size_t, size_t, std::string> GetConfig(const std::string_view& path_to_config_file);
-//}
 constexpr std::string_view End_Of_Line = "\r\n";
 
 
